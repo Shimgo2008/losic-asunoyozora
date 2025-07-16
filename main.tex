@@ -1,0 +1,350 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{physics}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{caption}
+
+
+\geometry{margin=25mm}
+\setstretch{1.2}
+\title{自由落下における初期高度の推定 \\ \large 「アスノヨゾラ哨戒班 feat.IA」のMV描写に基づく解析}
+\author{しん}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+
+\tableofcontents
+\newpage
+\section{はじめに}
+\label{sec:intro}
+
+本研究は、ボーカロイド楽曲「アスノヨゾラ哨戒班 feat.IA」のミュージックビデオ(MV)に着想を得ています。同MVの序盤には、少女が自由落下しているかのように見える描写があります。この映像を視聴した際、「もし現実世界で、この楽曲の再生時間と同じ時間だけ自由落下するとしたら、どれほどの初期高度が必要になるのだろうか？」という疑問が想起されました。
+
+しかし、MV中の背景の動きは限定的であり、また映像表現としての演出(終盤における落下表現からの変化など)が含まれるため、映像のみから落下時の正確な高度を特定することは困難です。そこで本研究では、現実世界における物理法則に基づき、指定された落下時間(具体的には、楽曲の全長である約177秒間)で地面に到達するために必要な初期高度を算出することを目的とします。
+
+本解析は、汎用的な空気抵抗を考慮した自由落下シミュレーションとしても活用可能です。本稿では、自由落下を記述する物理モデルを定義し、その運動方程式を定式化します。さらに、この運動方程式を数値的に解く手法について述べ、最終的な計算結果とその考察を行います。
+
+\section{最終目標}
+本稿の目的は、物体をある初期高度 $Z_{\mathrm{initial}}$ から自由落下させた際に、指定された目標時間 $T_{\mathrm{target}}$ で地面 ($Z=0$) に到達するために必要な $Z_{\mathrm{initial}}$ を決定することである。\\
+この過程では、物体の運動に影響を与える重力および空気抵抗を考慮し、これらの力は物体の高度や速度に応じて変化するものとする。
+
+\section{記号一覧}
+\label{sec:symbols}
+
+本稿で使用する主な記号を以下に示す。単位も併記する。
+\begin{itemize}
+    \item $t$: 時刻 $[\mathrm{s}]$
+    \item $T_{\mathrm{target}}$: 目標落下時間 $[\mathrm{s}]$
+    \item $Z(t)$: 時刻 $t$ における地面からの高度 $[\mathrm{m}]$
+    \item $Z_{\mathrm{initial}}$: 初期高度 ($t=0$ における高度) $[\mathrm{m}]$
+    \item $v(t)$: 時刻 $t$ における物体の速度 $[\mathrm{m/s}]$ (鉛直上向きを正とする)
+    \item $a(t, Z, v)$: 時刻 $t$ における物体の加速度 $[\mathrm{m/s^2}]$
+    \item $\bm{y}(t)$: 時刻 $t$ における状態ベクトル $\begin{pmatrix} Z(t) \\ v(t) \end{pmatrix}$
+    \item $\bm{f}(t, \bm{y})$: 状態ベクトル $\bm{y}$ の時間変化率を定義する関数
+    \item $g$: 重力加速度 $[\mathrm{m/s^2}]$
+    \item $\rho(Z)$: 高度 $Z$ における空気密度 $[\mathrm{kg/m^3}]$
+    \item $m$: 物体の質量 $[\mathrm{kg}]$
+    \item $C_{\mathrm{D}}$: 抗力係数
+    \item $A$: 物体の断面積 $[\mathrm{m^2}]$
+    \item $k$: 空気抵抗の係数(例: $k = \frac{1}{2} \rho(Z) C_{\mathrm{D}} A$)
+\end{itemize}
+
+\section{物理モデル}
+\label{sec:physics_model}
+
+本研究で採用する自由落下運動の物理モデルについて詳細を記述する。\\
+また特に断りがない場合、U.S. Standard Atmosphere (1976) / NASA を引用する。
+\subsection*{座標系と運動を記述する変数}
+
+
+\subsection*{物体に作用する力}
+
+
+\subsubsection{定数}
+以下は、U.S. Standard Atmosphere (1976) モデルの実装に使用される主要な定数である。
+
+\paragraph{基本的な物理定数}
+\begin{itemize}
+    \item 気体定数 ($R^*$): $8.314462618 \times 10^{3} \, \mathrm{J \cdot (kmol \cdot K)^{-1}}$ (Source: 2022 CODATA)。本モデルではキロモル単位で扱う。
+    \item 海面における乾燥空気の平均分子量 ($M_0$): $28.9644 \, \mathrm{kg/kmol}$。
+\end{itemize}
+
+\paragraph{地球関連の定数}
+\begin{itemize}
+    \item 標準重力加速度 ($g_0$): $9.80665 \, \mathrm{m/s^2}$。海面における基準値。
+    \item 地球の有効半径 ($r_0$): $6.356766 \times 10^6 \, \mathrm{m}$。標準重力加速度が定義される緯度に対応する値。
+\end{itemize}
+
+\paragraph{U.S. Standard Atmosphere (1976) の構造パラメータ (86km未満)}
+このモデルは、ジオポテンシャル高度$H$に対する分子スケール温度$T_M$が線形に変化する複数の層で構成される。各層のパラメータは以下の通りである。
+\begin{itemize}
+    \item 基準ジオポテンシャル高度 ($H_b$): 各層の下端のジオポテンシャル高度。
+    \item 基準分子スケール温度 ($T_{M,b}$): 各層の下端における分子スケール温度。
+    \item 分子スケール温度勾配 ($L_{M,b}$): 各層におけるジオポテンシャル高度に対する温度の変化率。
+    \item 海面基準圧力 ($P_0$): $101325.0 \, \mathrm{Pa}$。高度0mにおける基準大気圧。
+\end{itemize}
+これらのパラメータの具体的な数値は、別表に示される。
+\begin{table}[h!]
+\centering
+\small % テーブル全体のフォントを小さくする
+\renewcommand{\arraystretch}{1.3} % 行の高さを少し広げる (paddingのような効果)
+\caption{U.S. Standard Atmosphere (1976) の地表面から84.852 $\mathrm{km}'$ジオポテンシャル高度までの線形区分温度プロファイルのパラメータ。傾き $L_{\mathrm{M,b}}$ は $H_{\mathrm{b}}$ から始まる層に適用される。}
+\label{tab:us_std_atm_params_below_86km}
+\begin{tabular}{cccc}
+\toprule
+\makecell{\textbf{index} \\ \textbf{$b$}} & \makecell{\textbf{GPMeter $H_{\mathrm{b}}$} \\ \textbf{$(\mathrm{km}')$}} & \makecell{\textbf{分子スケール温度} \\ \textbf{$T_{\mathrm{M,b}} \, (\mathrm{K})$ (at $H_{\mathrm{b}}$)}} & \makecell{\textbf{分子スケール温度勾配} \\ \textbf{$L_{\mathrm{M,b}} \, (\mathrm{K/km}')$}} \\
+\midrule
+0 & 0       & 288.15 & -6.5 \\
+1 & 11      & 216.65 &  0.0 \\
+2 & 20      & 216.65 & +1.0 \\
+3 & 32      & 228.65 & +2.8 \\
+4 & 47      & 270.65 &  0.0 \\
+5 & 51      & 270.65 & -2.8 \\
+6 & 71      & 214.65 & -2.0 \\
+7 & 84.852  & 186.87 &  (0.0)$^*$  \\
+\bottomrule
+\end{tabular}
+\\
+　
+\\
+\footnotesize{※この高度より上はこのテーブルの定義範囲外。}
+\end{table}
+
+\subsubsection{$a(Z, v)$}
+運動方程式
+\[
+  F = ma
+\]
+について考える時、今回求めたい空気密度を加味した自由落下時の加速度$a$についての式へと変形する時
+
+\[
+  F = mg - F_{\mathrm{resi}}
+\]
+\[
+  ma = mg - k(Z)v^2
+\]
+\[
+  \frac{ma}{m} = g - \frac{k(Z)v^2}{m}
+\]
+\[
+  a = g - \frac{k(Z)v^2}{m}
+\]
+\[
+  \therefore a(Z, v) := g - \frac{k(Z)v^2}{m}
+\]
+
+\subsubsection{$k(t, Z)$}
+先行研究より空気抵抗$F_{\mathrm{resi}}$は以下のように表せる
+\[
+  F_{\mathrm{resi}} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v^2
+\]
+\[
+  kv^2 = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v^2
+\]
+\[
+  k = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)
+\]
+\[
+  \therefore k(Z) := \frac{1}{2}C_{\mathrm{D}}A\rho(Z)
+\]
+
+\subsubsection{$A$}
+代表面積Aについて考える時、人間の平面図を変形することによって長方形に近似できると定義する。
+この場合人間の背面から前面までの厚みを$H_{\mathrm{thick}}$、バイデルトイド(肩幅間隔)を$H_{\mathrm{width}}$とする。
+\[
+H_{\mathrm{thick}} := H_{\mathrm{height}} \cdot (0.22 \text{--} 0.27)
+\]
+\[
+A := H_{\mathrm{thick}} H_{\mathrm{width}}
+\]
+
+\subsubsection{$C_{\mathrm{D}}$}
+わかんないからていすう！！！ %これはコメントです
+
+
+\subsubsection{$\rho(Z)$}
+%あとで言い方考える
+空気は乾燥していると仮定され、86 km を十分に下回る高さでは、大気は均一に混合されていると仮定され、一定の平均分子量 $M$ につながる相対分子組成を持つ。
+空気が完全な気体として扱われる場合、大気中の任意の点での全圧力 $P$、温度 $T$、および全密度 $\rho$ は、状態方程式、すなわち完全な気体法則によって関連付けられ、その1つの形式は以下のように表される。
+\[
+P = \frac{\rho R^* T}{M}
+\]
+両辺にMを掛けて、$R^*T$で除算する
+\[
+\rho R^* T = PM
+\]
+\[
+  \rho = \frac{P M}{R^* T}
+\]
+\[
+  \rho(Z) := \frac{P(Z) M(Z)}{R^* T(Z)}
+\]
+
+\subsubsection*{$P(H)$ の導出}
+
+静水圧平衡の基本式は、圧力 $P$、密度 $\rho$、重力加速度 $g$、幾何高度 $Z$ を用いて次のように表される。
+\[
+\frac{dP}{dZ} = - \rho g
+\]
+ここで、理想気体の状態方程式 $P = \rho \frac{R^*}{M} T_M$ と、ジオポテンシャル高度 $H$ の定義 $dH = \frac{g}{g_0} dZ$ を用いると、基本式は次のように変形できる。
+\[
+\frac{1}{P}\frac{dP}{dH} = -\frac{g_0 M}{R^*T_M(H)}
+\]
+$T_M(H)$ はジオポテンシャル高度 $H$ における分子スケール温度である。
+
+\subsubsection*{場合1: 温度勾配 $L_{M,b} \neq 0$ のとき}
+
+この場合、温度は $T_M(H) = T_{M,b} + L_{M,b}(H - H_b)$ と線形に変化する。基本式を層の底（高度 $H_b$、圧力 $P_b$）から任意の高度 $H$ まで積分する。
+\[
+\int_{P_b}^{P} \frac{1}{P'} dP' = \int_{H_b}^{H} -\frac{g_0 M}{R^* \left[ T_{M,b} + L_{M,b}(H' - H_b) \right]} dH'
+\]
+\[
+\ln\left(\frac{P}{P_b}\right) = - \frac{g_0 M}{R^*} \int_{H_b}^{H} \frac{1}{T_{M,b} + L_{M,b}(H' - H_b)} dH'
+\]
+ここで、右辺の積分を $u = T_{M,b} + L_{M,b}(H' - H_b)$ と置換して計算する。
+このとき $du = L_{M,b} dH'$ であり、積分範囲は $u(H_b) = T_{M,b}$ から $u(H) = T_M(H)$ となる。
+\begin{align*}
+\int_{H_b}^{H} \frac{1}{T_{M,b} + L_{M,b}(H' - H_b)} dH' &= \int_{T_{M,b}}^{T_M(H)} \frac{1}{u} \left(\frac{1}{L_{M,b}} du\right) \\
+&= \frac{1}{L_{M,b}} \left[ \ln|u| \right]_{T_{M,b}}^{T_M(H)} \\
+&= \frac{1}{L_{M,b}} \ln\left( \frac{T_M(H)}{T_{M,b}} \right)
+\end{align*}
+これを元の式に戻すと、
+\begin{align*}
+\ln\left(\frac{P}{P_b}\right) &= - \frac{g_0 M}{R^* L_{M,b}} \ln\left(\frac{T_M(H)}{T_{M,b}}\right) \\
+&= \ln\left[ \left(\frac{T_M(H)}{T_{M,b}}\right)^{-\frac{g_0 M}{R^* L_{M,b}}} \right]
+\end{align*}
+したがって、圧力 $P$ は次式で求められる。
+\[
+P(H) = P_b \left( \frac{T_M(H)}{T_{M,b}} \right)^{-\frac{g_0 M}{R^* L_{M,b}}} = P_b \left( \frac{T_{M,b}}{T_M(H)} \right)^{\frac{g_0 M}{R^* L_{M,b}}}
+\]
+
+\subsubsection*{場合2: 温度勾配 $L_{M,b} = 0$ のとき}
+この場合、温度は層内で一定 ($T_M(H) = T_{M,b}$) となる。基本式はより単純になる。
+\[
+\frac{1}{P}\frac{dP}{dH} = -\frac{g_0 M}{R^* T_{M,b}}
+\]
+これを $H_b$ から $H$ まで積分する。
+\begin{align*}
+\int_{P_b}^{P} \frac{1}{P'} dP' &= \int_{H_b}^{H} -\frac{g_0 M}{R^* T_{M,b}} dH' \\
+\ln\left(\frac{P}{P_b}\right) &= -\frac{g_0 M}{R^* T_{M,b}} \int_{H_b}^{H} 1 \, dH' \\
+&= -\frac{g_0 M}{R^* T_{M,b}} (H - H_b)
+\end{align*}
+したがって、圧力 $P$ は次式で求められる。
+\[
+P(H) = P_b \exp\left(-\frac{g_0 M}{R^* T_{M,b}} (H-H_b)\right)
+\]
+
+\subsubsection*{結論}
+以上をまとめると、ジオポテンシャル高度 $H$ における圧力 $P(H)$ は、次の場合分けで計算される。
+\[
+P(H) =
+\begin{cases}
+  P_b \left( \frac{T_{M,b}}{T_M(H)} \right)^{\frac{g_0 M}{R^*L_{M,b}}} & \text{if } L_{M,b} \neq 0 \\
+  P_b \exp \left( -\frac{g_0 M}{R^*T_{M,b}}(H-H_b) \right) & \text{if } L_{M,b} = 0
+\end{cases}
+\]
+ただし、
+\[
+T_M(H) = T_{M,b} + L_{M,b}(H - H_b)
+\]
+
+\subsection*{加速度の定義}
+
+
+\section{運動方程式の定式化}
+\label{sec:eom}
+
+前節(\ref{sec:physics_model}節)で定義した記号と物理モデルに基づき、物体の運動を記述する運動方程式を定式化する。物体の運動は、高度 $Z(t)$ と速度 $v(t)$ に関する以下の連立常微分方程式によって表される：
+
+\[
+\dv{Z}{t} = v(t)
+\quad\text{および}\quad
+\dv{v}{t} = a(t, Z, v)
+\]
+
+物体の状態を記述する高度 $Z(t)$ と速度 $v(t)$ をまとめて一つの「状態ベクトル」$\bm{y}(t)$ として定義する。状態ベクトルは以下のように表現される：
+
+\[
+\bm{y}(t) = \begin{pmatrix} Z(t) \\ v(t) \end{pmatrix}
+\]
+
+ここで言う「状態」とは、その時点の情報が分かれば、その後の系の時間発展(未来の振る舞い)が一意に予測可能となるような、必要最低限の変数の集合を指す。自由落下運動の場合、高度と速度がこの状態を完全に記述する情報となる。
+
+この状態ベクトルを用いると、上記の連立常微分方程式は、以下の形式を持つ「1階ベクトル常微分方程式」として統一的に表現可能となる：
+
+\[
+\dv{\bm{y}}{t} = \bm{f}(t, \bm{y})
+\]
+
+ここで、関数 $\bm{f}(t, \bm{y})$ は、現在の状態 $\bm{y} = \begin{pmatrix} Z \\ v \end{pmatrix}$ が与えられたときの状態の時間的な変化率を定義するものであり、次のように定義される：
+
+\[
+\bm{f}\left(t, \begin{pmatrix} Z \\ v \end{pmatrix}\right) := \begin{pmatrix} v \\ a(t, Z, v) \end{pmatrix}
+\]
+
+このように運動方程式を1階ベクトル常微分方程式の形式で表現することは、ルンゲ＝クッタ法(RK4法)をはじめとする標準的な数値積分アルゴリズムを用いた効率的な解析を可能にするという利点がある。
+
+\section{解析手法}
+
+
+定式化された運動方程式を解き、目標落下時間 $T_{\mathrm{target}}$ に対応する初期高度 $Z_{\mathrm{initial}}$ を求めるための具体的な解析手法について述べる。
+
+先の章で述べた(今後書く予定)である,hについて解析的に解いた方程式をもとに、解析解での高度$Z_{\mathrm{analy}}$を求め、それをもとに二分探索を用いたRK4を使い、誤差$10^{-3}$まで計算するようにする
+
+\label{sec:method}
+
+定式化された運動方程式を解き、目標落下時間 $T_{\mathrm{target}}$ に対応する初期高度 $Z_{\mathrm{initial}}$ を決定するため、本研究では数値計算によるアプローチを採用する。その解析手法は、(1)初期高度の概算、(2)二分法による最適解の探索、(3)ルンゲ＝クッタ法による運動のシミュレーション、という3つの主要な要素から構成される。
+
+\paragraph{初期高度の概算と探索範囲の設定}
+\label{par:initial_guess}
+効率的な探索を行うため、まず初期高度 $Z_{\mathrm{initial}}$ のおおよその値を推定する。本研究では、空気密度を地表付近の値で一定と仮定した場合の運動方程式の解析解を利用する。この解析解を反復的に適用し、収束した値を初期高度の概算値 $Z_{\mathrm{guess}}$ とする。この $Z_{\mathrm{guess}}$ を中心に、十分な幅を持つ探索範囲 $[Z_{\mathrm{low}}, Z_{\mathrm{high}}]$ を設定する。
+
+\paragraph{二分法による初期高度の探索}
+\label{par:bisection}
+設定された探索範囲内で真の解 $Z_{\mathrm{initial}}$ を見つけるため、二分法（bisection method）を用いる。二分法は、解が存在することが保証された区間の中点を評価し、その結果に応じて区間を半分に狭めていく反復的なアルゴリズムである。具体的な手順は以下の通りである。
+\begin{enumerate}
+    \item 探索範囲の中点 $Z_{\mathrm{mid}} = (Z_{\mathrm{low}} + Z_{\mathrm{high}}) / 2$ を、初期高度の候補とする。
+    \item 初期条件 $\bm{y}(0) = \begin{pmatrix} Z_{\mathrm{mid}} \\ 0 \end{pmatrix}$ として、時刻 $t=0$ から $t=T_{\mathrm{target}}$ までの物体の運動を数値的にシミュレーションする。
+    \item 時刻 $T_{\mathrm{target}}$ における最終的な高度 $Z(T_{\mathrm{target}})$ を評価する。
+    \begin{itemize}
+        \item もし $Z(T_{\mathrm{target}}) > 0$ であれば、初期高度が高すぎたことを意味するため、探索範囲の上限を $Z_{\mathrm{high}} = Z_{\mathrm{mid}}$ に更新する。
+        \item もし $Z(T_{\mathrm{target}}) < 0$ であれば、初期高度が低すぎたことを意味するため、探索範囲の下限を $Z_{\mathrm{low}} = Z_{\mathrm{mid}}$ に更新する。
+    \end{itemize}
+    \item 探索範囲の幅 $(Z_{\mathrm{high}} - Z_{\mathrm{low}})$ が、あらかじめ設定した許容誤差 $\epsilon$（本研究では $10^{-3} \, \mathrm{m}$）よりも小さくなるまで、ステップ1から3を繰り返す。
+\end{enumerate}
+このプロセスにより、指定された精度で目標を達成する初期高度 $Z_{\mathrm{initial}}$ が求められる。
+
+\paragraph{4次ルンゲ＝クッタ法による数値積分}
+\label{par:rk4}
+二分法の各ステップで必要となる運動のシミュレーションは、4次のルンゲ＝クッタ法（RK4法）を用いて行う。RK4法は、1階ベクトル常微分方程式 $\dv{\bm{y}}{t} = \bm{f}(t, \bm{y})$ を解くための高精度な数値積分手法である。
+時刻 $t_n$ における状態ベクトル $\bm{y}_n$ から、時間ステップ幅 $\Delta t$ 後の状態 $\bm{y}_{n+1}$ を、以下の式で算出する。
+\begin{align*}
+    \bm{k}_1 &= \bm{f}(t_n, \bm{y}_n) \\
+    \bm{k}_2 &= \bm{f}\left(t_n + \frac{\Delta t}{2}, \bm{y}_n + \frac{\Delta t}{2}\bm{k}_1\right) \\
+    \bm{k}_3 &= \bm{f}\left(t_n + \frac{\Delta t}{2}, \bm{y}_n + \frac{\Delta t}{2}\bm{k}_2\right) \\
+    \bm{k}_4 &= \bm{f}(t_n + \Delta t, \bm{y}_n + \Delta t \bm{k}_3) \\
+    \bm{y}_{n+1} &= \bm{y}_n + \frac{\Delta t}{6}(\bm{k}_1 + 2\bm{k}_2 + 2\bm{k}_3 + \bm{k}_4)
+\end{align*}
+本研究では、時間ステップ幅 $\Delta t = 0.01 \, \mathrm{s}$ を用いて、十分な計算精度を確保する。
+
+
+
+\section{補足説明(FAQ)}
+\label{sec:faq}
+
+以下に、本稿の理解を助けるための補足説明を記載する。
+
+\subsection*{Q. 縦ベクトルとは？}
+複数の数値を、特定の順序で縦一列に並べて括弧で囲んだベクトルである。各数値の位置によって、それが表す情報の内容が区別される。例えば、高度 $Z$ と速度 $v$ をまとめた状態ベクトルは $\begin{pmatrix} Z \\ v \end{pmatrix}$ のように表現される。数学的には「列ベクトル」、あるいは「列数が1の行列」とも呼ばれる。
+
+\subsection*{Q. 状態ベクトルとは？}
+物理系や力学系の「状態」を定義するために必要かつ十分な、最小限の独立した変数をまとめてベクトル形式で表現したものである。系の現在の「状態」が既知であれば、その後の系の時間発展(未来の振る舞い)が一意に予測可能となる。本稿における自由落下運動の場合、任意の時刻における物体の高度 $Z$ と速度 $v$ が分かれば、その後の運動は物理法則(運動方程式)によって完全に決定されるため、$(Z, v)$ のペアが系の状態を記述する最小限の情報となる。これらの変数をベクトルとして扱うことで、運動方程式を標準的な形式で記述し、数値解析を行いやすくなる。
+
+\end{document}
