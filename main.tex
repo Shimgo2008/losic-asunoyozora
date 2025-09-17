@@ -137,11 +137,41 @@
   \therefore a(Z, v) := -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
 \]
 
-\subsection{$g(Z)$}
+\subsubsection{$g(Z)$}
 
 \[
   g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)^2
 \]
+
+\subsubsection{Geopotential Height \(H\)}
+
+ジオポテンシャル高度 \(H\) は、幾何高度 \(Z\) に対応する補助的な高度尺度であり、重力加速度の変化を考慮して定義される。  
+微分形式では次のように表される。
+\[
+dH = \frac{g(Z)}{g_0} \, dZ
+\]
+ここで、
+\begin{itemize}
+  \item \(g_0\) は海面における標準重力加速度（約 \(9.80665~\mathrm{m/s^2}\)）
+  \item \(g(Z)\) は高度 \(Z\) における重力加速度
+\end{itemize}
+
+重力加速度 \(g(Z)\) は地球半径 \(r_0\) を用いて次のように近似される。
+\[
+g(Z) = g_0 \left( \frac{r_0}{r_0 + Z} \right)^2
+\]
+
+したがって、ジオポテンシャル高度と幾何高度の関係は積分により得られる。
+\[
+H(Z) := \int_0^Z \frac{g(z)}{g_0} dz \approx \frac{r_0 Z}{r_0 + Z}
+\]
+
+逆に、ジオポテンシャル高度 \(H\) から幾何高度 \(Z\) を求める式は以下の通りである。
+\[
+Z(H) := \frac{r_0 H}{r_0 - H}
+\]
+
+
 \subsubsection{$F_{\mathrm{resi}}(Z, v)$}
 ナビエ-ストークス方程式の基本形
 \[
@@ -185,7 +215,10 @@ A := H_{\mathrm{thick}} H_{\mathrm{width}}
 わかんないからていすう！！！ %これはコメントです
 
 
-\subsubsection{$\rho(Z)$}
+
+
+
+\subsubsection{$\rho(H)$}
 空気は乾燥していると仮定され、86 km を十分に下回る高さでは、大気は均一に混合されていると仮定され、一定の平均分子量 $M$ につながる相対分子組成を持つ。
 空気が完全な気体として扱われる場合、大気中の任意の点での全圧力 $P$、温度 $T$、および全密度 $\rho$ は、状態方程式、すなわち完全な気体法則によって関連付けられ、その1つの形式は以下のように表される。
 \[
@@ -194,7 +227,7 @@ P = \frac{\rho R^* T}{M} \quad \Rightarrow \quad \rho = \frac{P M}{R^* T}
 
 今回の86kmを十分に下回る過程においては、平均分子量$M$は定数$M_0$を用いることができる
 \[
-  \rho(Z) := \frac{P(Z) M_0}{R^* T(Z)}
+  \rho(H(Z)) := \frac{P(H) M_0}{R^* T(H)}
 \]
 
 \subsubsection{$M_0$}
@@ -202,34 +235,43 @@ P = \frac{\rho R^* T}{M} \quad \Rightarrow \quad \rho = \frac{P M}{R^* T}
 海面における乾燥空気の平均分子量:\\ $M_0 = 28.9644 \, \mathrm{kg/kmol}$ (または $0.0289644 \, \mathrm{kg/mol}$)\\\\
 
 
-\subsubsection{$T(Z)$}
+\subsubsection{$T(H)$}
+補助的な関数としてヘヴィサイド関数を用いる
+$$
+\theta(x) :=\left\{
+  \begin{array}{ll}
+    1 & \text{if } x \geq 0 \\
+    0 & \text{if } x < 0
+  \end{array}
+\right.
+$$
 TはU.S. Standard Atmosphere (1976) に基づく温度プロファイルに従う。\\
 $\begin{aligned}
-T(h)
+T(H)
 &=
-\underbrace{\bigl[\,288.15 - 6.5\,h\bigr]\,
-H(11 - h)}_{\text{(0～11 km)}} \\[6pt]
+\underbrace{\bigl[\,288.15 - 6.5\,H\bigr]\,
+\theta(11 - H)}_{\text{(0～11 km)}} \\[6pt]
 &\quad{}+ 
-\underbrace{216.65 \,
-H(h - 11)\,H(20 - h)}_{\text{(11～20 km)}} \\[6pt]
+\underbrace{\bigl[216.65\bigr] \,
+\theta(H - 11)\,\theta(20 - H)}_{\text{(11～20 km)}} \\[6pt]
 &\quad{}+
-\underbrace{\bigl[\,216.65 + (h - 20)\bigr]\,
-H(h - 20)\,H(32 - h)}_{\text{(20～32 km)}} \\[6pt]
+\underbrace{\bigl[\,216.65 + (H - 20)\bigr]\,
+\theta(H - 20)\,\theta(32 - H)}_{\text{(20～32 km)}} \\[6pt]
 &\quad{}+
-\underbrace{\bigl[\,228.65 + 2.8\,(h - 32)\bigr]\,
-H(h - 32)\,H(47 - h)}_{\text{(32～47 km)}} \\[6pt]
+\underbrace{\bigl[\,228.65 + 2.8\,(H - 32)\bigr]\,
+\theta(H - 32)\,\theta(47 - H)}_{\text{(32～47 km)}} \\[6pt]
 &\quad{}+
-\underbrace{270.65 \,
-H(h - 47)\,H(51 - h)}_{\text{(47～51 km)}} \\[6pt]
+\underbrace{\bigl[270.65\bigr] \,
+\theta(H - 47)\,\theta(51 - H)}_{\text{(47～51 km)}} \\[6pt]
 &\quad{}+
-\underbrace{\bigl[\,270.65 - 2.8\,(h - 51)\bigr]\,
-H(h - 51)\,H(71 - h)}_{\text{(51～71 km)}} \\[6pt]
+\underbrace{\bigl[\,270.65 - 2.8\,(H - 51)\bigr]\,
+\theta(H - 51)\,\theta(71 - H)}_{\text{(51～71 km)}} \\[6pt]
 &\quad{}+
-\underbrace{\bigl[\,214.65 - 2.0\,(h - 71)\bigr]\,
-H(h - 71)\,H(86 - h)}_{\text{(71～86 km)}} \\[6pt]
+\underbrace{\bigl[\,214.65 - 2.0\,(H - 71)\bigr]\,
+\theta(H - 71)\,\theta(86 - H)}_{\text{(71～86 km)}} \\[6pt]
 &\quad{}+
-\underbrace{184.65 \,
-H(h - 86)}_{\text{(86 km 以上)}}.
+\underbrace{\bigl[184.65\bigr] \,
+\theta(H - 86)}_{\text{(86 km 以上)}}.
 \end{aligned}$
 
 
