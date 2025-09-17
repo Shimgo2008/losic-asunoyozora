@@ -143,7 +143,30 @@
   g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)^2
 \]
 \subsubsection{$F_{\mathrm{resi}}(Z, v)$}
-先行研究より空気抵抗$F_{\mathrm{resi}}$は以下のように表せる
+ナビエ-ストークス方程式の基本形
+\[
+\frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v} = -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \frac{\chi + \frac{1}{3}\mu}{\rho}\mathrm{grad}\,\Theta + \frac{\Theta}{\rho}\mathrm{grad}\left(\chi + \frac{1}{3}\mu\right)
+\]
+\[
++ \frac{1}{\rho}\mathrm{grad}\left(\boldsymbol{v} \cdot \mathrm{grad}\,\mu\right) + \frac{1}{\rho}\mathrm{rot}\left(\boldsymbol{v} \times \mathrm{grad}\,\mu\right) - \frac{1}{\rho}\boldsymbol{v}\Delta\mu + \boldsymbol{g}
+\]
+今回は、非圧縮性流体$\nabla\cdot v \approx 0$で、剪断粘性率$\mu$は一定であると仮定し、ナビエ-ストークス方程式を簡略化して扱う
+\[
+  \frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v} = -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \boldsymbol{g}
+\]
+\[
+  \rho\left(\frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}\right) = -\mathrm{grad}\,p + \mu\Delta\boldsymbol{v} + \rho\boldsymbol{g}
+\]
+表記を整えて
+\[
+  \rho\left(\frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}\right)= -\nabla p + \mu \nabla^2\boldsymbol{v} + f
+\]
+単位時間あたり、物体前面を通過する流体の質量 $\rho(Z)A\abs{v}$ に、流体の速度変化は最大で物体速度$v$とする。\\
+この速度変化の平均 $\frac{\Delta v + v}{2} \sim \frac{v}{2}$と、形状や乱流の影響を補正するための効力係数$C_\mathrm{D}$を掛けると
+\[
+  \frac{v}{2}\rho(Z)A\abs{v}C_\mathrm{D}
+\]
+よって
 \[
   F_{\mathrm{resi}}(Z, v) := -\frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
 \]
@@ -205,7 +228,7 @@ $T_M(H)$ はジオポテンシャル高度 $H$ における分子スケール温
 このとき $du = L_{M,b} dH'$ であり、積分範囲は $u(H_b) = T_{M,b}$ から $u(H) = T_M(H)$ となる。
 \begin{align*}
 \int_{H_b}^{H} \frac{1}{T_{M,b} + L_{M,b}(H' - H_b)} dH' &= \int_{T_{M,b}}^{T_M(H)} \frac{1}{u} \left(\frac{1}{L_{M,b}} du\right) \\
-&= \frac{1}{L_{M,b}} \left[ \ln|u| \right]_{T_{M,b}}^{T_M(H)} \\
+&= \frac{1}{L_{M,b}} \left[ \ln\abs{u} \right]_{T_{M,b}}^{T_M(H)} \\
 &= \frac{1}{L_{M,b}} \ln\left( \frac{T_M(H)}{T_{M,b}} \right)
 \end{align*}
 これを元の式に戻すと、
