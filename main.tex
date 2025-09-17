@@ -120,44 +120,32 @@
 \subsubsection{$a(Z, v)$}
 運動方程式
 \[
-  F = -ma
+  F = ma
 \]
 について考える時、今回求めたい空気密度を加味した自由落下時の加速度$a$についての式へと変形する時
 
 \[
-  F = mg(Z) - F_{\mathrm{resi}}
+  ma = -mg(Z) + F_{\mathrm{resi}}(Z, v)
 \]
 \[
-  ma = mg(Z) - k(Z)v\abs{v}
+  \frac{ma}{m} = -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
 \]
 \[
-  \frac{ma}{m} = g(Z) - \frac{k(Z)v\abs{v}}{m}
+  a = -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
 \]
 \[
-  a = g - \frac{k(Z)v\abs{v}}{m}
-\]
-\[
-  \therefore a(Z, v) := g(Z) - \frac{k(Z)v\abs{v}}{m}
+  \therefore a(Z, v) := -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
 \]
 
 \subsection{$g(Z)$}
 
 \[
-  g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)
+  g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)^2
 \]
-\subsubsection{$k(t, Z)$}
+\subsubsection{$F_{\mathrm{resi}}(Z, v)$}
 先行研究より空気抵抗$F_{\mathrm{resi}}$は以下のように表せる
 \[
-  F_{\mathrm{resi}} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
-\]
-\[
-  kv\abs{v} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
-\]
-\[
-  k = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)
-\]
-\[
-  \therefore k(Z) := \frac{1}{2}C_{\mathrm{D}}A\rho(Z)
+  F_{\mathrm{resi}}(Z, v) := -\frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
 \]
 
 \subsubsection{$A$}
