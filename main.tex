@@ -120,33 +120,38 @@
 \subsubsection{$a(Z, v)$}
 運動方程式
 \[
-  F = ma
+  F = -ma
 \]
 について考える時、今回求めたい空気密度を加味した自由落下時の加速度$a$についての式へと変形する時
 
 \[
-  F = mg - F_{\mathrm{resi}}
+  F = mg(Z) - F_{\mathrm{resi}}
 \]
 \[
-  ma = mg - k(Z)v^2
+  ma = mg(Z) - k(Z)v\abs{v}
 \]
 \[
-  \frac{ma}{m} = g - \frac{k(Z)v^2}{m}
+  \frac{ma}{m} = g(Z) - \frac{k(Z)v\abs{v}}{m}
 \]
 \[
-  a = g - \frac{k(Z)v^2}{m}
+  a = g - \frac{k(Z)v\abs{v}}{m}
 \]
 \[
-  \therefore a(Z, v) := g - \frac{k(Z)v^2}{m}
+  \therefore a(Z, v) := g(Z) - \frac{k(Z)v\abs{v}}{m}
 \]
 
+\subsection{$g(Z)$}
+
+\[
+  g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)
+\]
 \subsubsection{$k(t, Z)$}
 先行研究より空気抵抗$F_{\mathrm{resi}}$は以下のように表せる
 \[
-  F_{\mathrm{resi}} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v^2
+  F_{\mathrm{resi}} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
 \]
 \[
-  kv^2 = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v^2
+  kv\abs{v} = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
 \]
 \[
   k = \frac{1}{2}C_{\mathrm{D}}A\rho(Z)
@@ -300,7 +305,10 @@ T_M(H) = T_{M,b} + L_{M,b}(H - H_b)
 
 \label{sec:method}
 
-定式化された運動方程式を解き、目標落下時間 $T_{\mathrm{target}}$ に対応する初期高度 $Z_{\mathrm{initial}}$ を決定するため、本研究では数値計算によるアプローチを採用する。その解析手法は、(1)初期高度の概算、(2)二分法による最適解の探索、(3)ルンゲ＝クッタ法による運動のシミュレーション、という3つの主要な要素から構成される。
+定式化された運動方程式を解き、目標落下時間 $T_{\mathrm{target}}$ に対応する初期高度 $Z_{\mathrm{initial}}$ を決定するため、本研究では数値計算によるアプローチを採用する。その解析手法は、
+\\(1)初期高度の概算、
+\\(2)二分法による最適解の探索、
+\\(3)ルンゲ＝クッタ法による運動のシミュレーション、\\という3つの主要な要素から構成される。
 
 \paragraph{初期高度の概算と探索範囲の設定}
 \label{par:initial_guess}
