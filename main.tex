@@ -274,8 +274,71 @@ T(H)
 \theta(H - 86)}_{\text{(86 km 以上)}}.
 \end{aligned}$
 
+\subsubsection{$P(H)$}
 
-\subsubsection*{$P(H)$}
+静水圧平衡の基本式は、圧力 $P$、密度 $\rho$、重力加速度 $g$、幾何高度 $Z$ を用いて次のように表される。
+\[
+\frac{dP}{dZ} = - \rho g
+\]
+ここで、理想気体の状態方程式 $P = \rho \frac{R^*}{M} T_M$ と、ジオポテンシャル高度 $H$ の定義 $dH = \frac{g}{g_0} dZ$ を用いると、基本式は次のように変形できる。
+\[
+\frac{1}{P}\frac{dP}{dH} = -\frac{g_0 M}{R^*T_M(H)}
+\]
+
+\begin{align*}
+\frac{d\ln P}{dH} &= \frac{1}{P}\frac{P}{dH}\\
+\frac{1}{P}\frac{P}{dH} &= -\frac{gM}{R^*T(H)}\\
+\end{align*}
+
+$L_{M, b}$が0.0以外の時、以下の形式で求められる\\
+
+\begin{align*}
+\ln \frac{P}{P_b}&=\int^H_Hb- \frac{gM}{R^*\left[T_b+L \cdot \left(H-H_b \right) \right]}\\
+dH&=- \frac{gM}{R^*} \int^H_{H_b}\frac{1}{T_b+L \cdot \left(H - H_b \right)}dH
+\end{align*}
+\[
+\ln \frac{P}{P_b}=\\
+\int_{H_b}^{H} \frac{1}{T_b + L(H - H_b)} dH \quad \xrightarrow{u=T_b+L(H-H_b), dH=\frac{1}{L}du} \quad \int_{T_b}^{T(H)} \frac{1}{u} \left(\frac{1}{L} du\right)
+\]
+\begin{align*}
+\text{以下途中式}\\
+\end{align*}
+
+\begin{align*}
+T_b&=u(H=H_b)=T_b+LH_b-LH_b\\
+T(H):&=u(H=H)=T_b+LH-LH_b\\\\
+\int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right) &=\frac{1}{L} \ln \left( \frac{T(H)}{T_b} \right)\\\\
+\ln \frac{P}{P_b}
+&=- \frac{gM}{R^*} \int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right)\\
+&=- \frac{gM}{R^*L} \ln \left( \frac{T(H)}{T_b} \right)\\
+&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\\\
+\ln \frac{P}{P_b}&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\
+P &= P_b \cdot \left( \frac{T_b}{T(H)} \right) ^ {\frac{gM}{R^*L}}\\
+\end{align*}
+
+
+また、$L_{M, b}$が0.0の時、以下の式を用いる。
+\begin{align*}
+\frac{1}{P}\frac{dP}{dH}&=-\frac{gM}{R^*T_0}\\
+\frac{1}{P}dP&=-\frac{gM}{R^*T_0}dH\\
+\int_{P_b}^{P}\frac{1}{P}dP&=\int_{H_b}^{H}\left(-\frac{gM}{R^*T_0}\right)dH\\
+\ln\frac{P}{P_b}&=-\frac{gM}{R^*T_0}\int_{H_b}^{H}1dH\\
+&=-\frac{gM}{R^*T_0}(H-H_b)\\
+\frac{P}{P_b}&=\exp (-\frac{gM}{R^*T_0}(H-H_b))\\
+P &= P_b \exp (-\frac{gM}{R^*T_0}(H-H_b))\\
+\end{align*}
+\[
+\therefore
+P(H) :=
+\left\{
+  \begin{array}{ll}
+    P_b \cdot \left( \frac{T_b}{T(H)} \right) ^ {\frac{gM}{R^*L}} & \text{if } L_{M,b} \not = 0\\
+    P_b \exp (-\frac{gM}{R^*T_0}(H-H_b)) & \text{if } L_{M,b} = 0 
+  \end{array}
+\right.
+\]
+
+\subsubsection{$P(H)$}
 
 静水圧平衡の基本式は、圧力 $P$、密度 $\rho$、重力加速度 $g$、幾何高度 $Z$ を用いて次のように表される。
 \[
