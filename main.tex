@@ -1,17 +1,29 @@
 \documentclass[a4paper,12pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb}
+
+% --- 基本パッケージ ---
+\usepackage{luatexja}
+
+\usepackage{amssymb}
 \usepackage{bm}
+\usepackage{mathtools}
+\usepackage{physics}
 \usepackage{geometry}
 \usepackage{setspace}
-\usepackage{physics}
+
+% --- 表・図関連のパッケージ ---
 \usepackage{booktabs}
 \usepackage{makecell}
 \usepackage{caption}
 
+% --- 単位と参照のパッケージ ---
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
 
+% --- ドキュメント設定 ---
 \geometry{margin=25mm}
 \setstretch{1.2}
+
 \title{自由落下における初期高度の推定 \\ \large 「アスノヨゾラ哨戒班 feat.IA」のMV描写に基づく解析}
 \author{しん}
 \date{\today}
@@ -19,9 +31,9 @@
 \begin{document}
 \maketitle
 
-
 \tableofcontents
 \newpage
+
 \section{はじめに}
 \label{sec:intro}
 
@@ -63,11 +75,10 @@
 また特に断りがない場合、U.S. Standard Atmosphere (1976) / NASA を引用する。
 \subsection*{座標系と運動を記述する変数}
 
-
 \subsection*{物体に作用する力}
 
 
-\subsubsection{定数}
+\subsection{定数}
 以下は、U.S. Standard Atmosphere (1976) モデルの実装に使用される主要な定数である。
 
 \paragraph{基本的な物理定数}
@@ -117,33 +128,48 @@
 \footnotesize{※この高度より上はこのテーブルの定義範囲外。}
 \end{table}
 
-\subsubsection{$a(Z, v)$}
+\subsection{\texorpdfstring{$a(Z, v)$}{}}
 運動方程式
 \[
   F = ma
 \]
-について考える時、今回求めたい空気密度を加味した自由落下時の加速度$a$についての式へと変形する時
+について考える時、今回求めたい空気密度を加味した自由落下時の加速度$a$についての式へと変形する時以下のようにする。
+この時鉛直上向きを正としているため、重力加速度$g(Z)$は負号を持つ。
 
+\begin{align*}
+  ma &= -mg(Z) + F_{\mathrm{D}}(Z, v)\\
+  \frac{ma}{m} &= -g(Z) + \frac{F_{\mathrm{D}}(Z, v)}{m}\\
+  a &= -g(Z) + \frac{F_{\mathrm{D}}(Z, v)}{m}\\
+\end{align*}
 \[
-  ma = -mg(Z) + F_{\mathrm{resi}}(Z, v)
-\]
-\[
-  \frac{ma}{m} = -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
-\]
-\[
-  a = -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
-\]
-\[
-  \therefore a(Z, v) := -g(Z) + \frac{F_{\mathrm{resi}}(Z, v)}{m}
+  \therefore a(Z, v) \coloneq -g(Z) + \frac{F_{\mathrm{D}}(Z, v)}{m}
 \]
 
-\subsubsection{$g(Z)$}
+\subsection{h(t)}
+運動方程式を
+\[
+  \frac{dv}{dt} = g - \frac{k}{m}v^2
+\]
+とする。このとき、変数分離積分により速度は
+\[
+V(t) = \sqrt{\frac{mg}{k}} \tanh\!\Big(\sqrt{\tfrac{kg}{m}}\,t\Big)
+\]
+で与えられる。初期条件 $v(0)=0$ を課した。
+
+さらに高度は
+\begin{align*}
+  h(t) &= \int_0^t V(t)\,dt\\
+&=\frac{m}{k}\ln\!\Big(\cosh\!\Big(\sqrt{\tfrac{kg}{m}}\,t\Big)\Big)
+\end{align*}
+となる。
+
+\subsection{\texorpdfstring{$g(Z)$}{g(Z)}}
 
 \[
-  g(Z) := g_0\left(\frac{r_0}{r_0+Z}\right)^2
+  g(Z) \coloneq g_0\left(\frac{r_0}{r_0+Z}\right)^2
 \]
 
-\subsubsection{Geopotential Height \(H\)}
+\subsection{\texorpdfstring{Geopotential Height \(H\)}{GPH}}
 
 ジオポテンシャル高度 \(H\) は、幾何高度 \(Z\) に対応する補助的な高度尺度であり、重力加速度の変化を考慮して定義される。  
 微分形式では次のように表される。
@@ -161,32 +187,34 @@ dH = \frac{g(Z)}{g_0} \, dZ
 g(Z) = g_0 \left( \frac{r_0}{r_0 + Z} \right)^2
 \]
 
+
+
 したがって、ジオポテンシャル高度と幾何高度の関係は積分により得られる。
 \[
-H(Z) := \int_0^Z \frac{g(z)}{g_0} dz \approx \frac{r_0 Z}{r_0 + Z}
+H(Z) \coloneq \int_0^Z \frac{g(z)}{g_0} dz \approx \frac{r_0 Z}{r_0 + Z}
 \]
 
 逆に、ジオポテンシャル高度 \(H\) から幾何高度 \(Z\) を求める式は以下の通りである。
 \[
-Z(H) := \frac{r_0 H}{r_0 - H}
+Z(H) \coloneq \frac{r_0 H}{r_0 - H}
 \]
 
 
-\subsubsection{$F_{\mathrm{resi}}(Z, v)$}
+\subsection{\texorpdfstring{$F_{\mathrm{D}}(Z, v)$}{F}}
 ナビエ-ストークス方程式の基本形
 \[
-\frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v} = -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \frac{\chi + \frac{1}{3}\mu}{\rho}\mathrm{grad}\,\Theta + \frac{\Theta}{\rho}\mathrm{grad}\left(\chi + \frac{1}{3}\mu\right)
+\frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}
 \]
-\[
-+ \frac{1}{\rho}\mathrm{grad}\left(\boldsymbol{v} \cdot \mathrm{grad}\,\mu\right) + \frac{1}{\rho}\mathrm{rot}\left(\boldsymbol{v} \times \mathrm{grad}\,\mu\right) - \frac{1}{\rho}\boldsymbol{v}\Delta\mu + \boldsymbol{g}
-\]
+\begin{align*}
+&= -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \frac{\chi + \frac{1}{3}\mu}{\rho}\mathrm{grad}\,\Theta + \frac{\Theta}{\rho}\mathrm{grad}\left(\chi + \frac{1}{3}\mu\right) \\
+&+ \frac{1}{\rho}\mathrm{grad}\left(\boldsymbol{v} \cdot \mathrm{grad}\,\mu\right) + \frac{1}{\rho}\mathrm{rot}\left(\boldsymbol{v} \times \mathrm{grad}\,\mu\right) - \frac{1}{\rho}\boldsymbol{v}\Delta\mu + \boldsymbol{g}
+\end{align*}
+
 今回は、非圧縮性流体$\nabla\cdot v \approx 0$で、剪断粘性率$\mu$は一定であると仮定し、ナビエ-ストークス方程式を簡略化して扱う
-\[
-  \frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v} = -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \boldsymbol{g}
-\]
-\[
-  \rho\left(\frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}\right) = -\mathrm{grad}\,p + \mu\Delta\boldsymbol{v} + \rho\boldsymbol{g}
-\]
+\begin{align*}
+  \frac{D\boldsymbol{v}}{Dt} = \frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v} &= -\frac{1}{\rho}\mathrm{grad}\,p + \frac{\mu}{\rho}\Delta\boldsymbol{v} + \boldsymbol{g}\\
+  \rho\left(\frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}\right) &= -\mathrm{grad}\,p + \mu\Delta\boldsymbol{v} + \rho\boldsymbol{g}
+\end{align*}
 表記を整えて
 \[
   \rho\left(\frac{\partial \boldsymbol{v}}{\partial t} + \left(\boldsymbol{v} \cdot \nabla\right)\boldsymbol{v}\right)= -\nabla p + \mu \nabla^2\boldsymbol{v} + f
@@ -196,29 +224,29 @@ Z(H) := \frac{r_0 H}{r_0 - H}
 \[
   \frac{v}{2}\rho(Z)A\abs{v}C_\mathrm{D}
 \]
-よって
+鉛直上向きを正としているため、下向きの抗力である$F_\mathrm{D}$は符号を反転させる
 \[
-  F_{\mathrm{resi}}(Z, v) := -\frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
+  F_{\mathrm{D}}(Z, v) \coloneq -\frac{1}{2}C_{\mathrm{D}}A\rho(Z)v\abs{v}
 \]
 
-\subsubsection{$A$}
+\subsection{\texorpdfstring{$A$}{A}}
 代表面積Aについて考える時、人間の平面図を変形することによって長方形に近似できると定義する。
 この場合人間の背面から前面までの厚みを$H_{\mathrm{thick}}$、バイデルトイド(肩幅間隔)を$H_{\mathrm{width}}$とする。
 \[
-H_{\mathrm{thick}} := H_{\mathrm{height}} \cdot (0.22 \text{--} 0.27)
+H_{\mathrm{thick}} \coloneq H_{\mathrm{height}} \cdot (0.22 \text{--} 0.27)
 \]
 \[
-A := H_{\mathrm{thick}} H_{\mathrm{width}}
+A \coloneq H_{\mathrm{thick}} H_{\mathrm{width}}
 \]
 
-\subsubsection{$C_{\mathrm{D}}$}
+\subsection{\texorpdfstring{$C_{\mathrm{D}}$}{Cd}}
 わかんないからていすう！！！ %これはコメントです
+あとでフォーマルな書き方にするから、ざっくばらんにいうと
 
 
 
 
-
-\subsubsection{$\rho(H)$}
+\subsection{\texorpdfstring{$\rho(H)$}{rho(H)}}
 空気は乾燥していると仮定され、86 km を十分に下回る高さでは、大気は均一に混合されていると仮定され、一定の平均分子量 $M$ につながる相対分子組成を持つ。
 空気が完全な気体として扱われる場合、大気中の任意の点での全圧力 $P$、温度 $T$、および全密度 $\rho$ は、状態方程式、すなわち完全な気体法則によって関連付けられ、その1つの形式は以下のように表される。
 \[
@@ -227,18 +255,18 @@ P = \frac{\rho R^* T}{M} \quad \Rightarrow \quad \rho = \frac{P M}{R^* T}
 
 今回の86kmを十分に下回る過程においては、平均分子量$M$は定数$M_0$を用いることができる
 \[
-  \rho(H(Z)) := \frac{P(H) M_0}{R^* T(H)}
+  \rho(H(Z)) \coloneq \frac{P(H) M_0}{R^* T(H)}
 \]
 
-\subsubsection{$M_0$}
+\subsection{\texorpdfstring{$M_0$}{M0}}
 86km以下は定数として扱える\\
 海面における乾燥空気の平均分子量:\\ $M_0 = 28.9644 \, \mathrm{kg/kmol}$ (または $0.0289644 \, \mathrm{kg/mol}$)\\\\
 
 
-\subsubsection{$T(H)$}
+\subsection{\texorpdfstring{$T(H)$}{Temp}}
 補助的な関数としてヘヴィサイド関数を用いる
 $$
-\theta(x) :=\left\{
+\theta(x) \coloneq\left\{
   \begin{array}{ll}
     1 & \text{if } x \geq 0 \\
     0 & \text{if } x < 0
@@ -274,7 +302,7 @@ T(H)
 \theta(H - 86)}_{\text{(86 km 以上)}}.
 \end{aligned}$
 
-\subsubsection{$P(H)$}
+\subsection{\texorpdfstring{$P(H)$}{Pressure}}
 
 静水圧平衡の基本式は、圧力 $P$、密度 $\rho$、重力加速度 $g$、幾何高度 $Z$ を用いて次のように表される。
 \[
@@ -290,7 +318,9 @@ T(H)
 \frac{1}{P}\frac{P}{dH} &= -\frac{gM}{R^*T(H)}\\
 \end{align*}
 
-$L_{M, b}$が0.0以外の時、以下の形式で求められる\\
+\subsubsection*{1: 温度勾配 $L_{M,b} \neq 0$ }
+
+この場合、温度は $T_M(H) = T_{M,b} + L_{M,b}(H - H_b)$ と線形に変化する。基本式を層の底（高度 $H_b$、圧力 $P_b$）から任意の高度 $H$ まで積分する。
 
 \begin{align*}
 \ln \frac{P}{P_b}&=\int^H_Hb- \frac{gM}{R^*\left[T_b+L \cdot \left(H-H_b \right) \right]}\\
@@ -300,36 +330,23 @@ dH&=- \frac{gM}{R^*} \int^H_{H_b}\frac{1}{T_b+L \cdot \left(H - H_b \right)}dH
 \ln \frac{P}{P_b}=\\
 \int_{H_b}^{H} \frac{1}{T_b + L(H - H_b)} dH \quad \xrightarrow{u=T_b+L(H-H_b), dH=\frac{1}{L}du} \quad \int_{T_b}^{T(H)} \frac{1}{u} \left(\frac{1}{L} du\right)
 \]
-\begin{align*}
-\text{以下途中式}\\
-\end{align*}
 
 \begin{align*}
 T_b&=u(H=H_b)=T_b+LH_b-LH_b\\
-T(H):&=u(H=H)=T_b+LH-LH_b\\\\
-\int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right) &=\frac{1}{L} \ln \left( \frac{T(H)}{T_b} \right)\\\\
-\ln \frac{P}{P_b}
-&=- \frac{gM}{R^*} \int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right)\\
-&=- \frac{gM}{R^*L} \ln \left( \frac{T(H)}{T_b} \right)\\
-&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\\\
-\ln \frac{P}{P_b}&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\
 P &= P_b \cdot \left( \frac{T_b}{T(H)} \right) ^ {\frac{gM}{R^*L}}\\
 \end{align*}
 
 
-また、$L_{M, b}$が0.0の時、以下の式を用いる。
+\subsubsection*{2: 温度勾配 $L_{M,b} = 0$}
+この時、温度は層内で一定 ($T_M(H) = T_{M,b}$) となる。基本式はより単純になる。
 \begin{align*}
 \frac{1}{P}\frac{dP}{dH}&=-\frac{gM}{R^*T_0}\\
-\frac{1}{P}dP&=-\frac{gM}{R^*T_0}dH\\
-\int_{P_b}^{P}\frac{1}{P}dP&=\int_{H_b}^{H}\left(-\frac{gM}{R^*T_0}\right)dH\\
-\ln\frac{P}{P_b}&=-\frac{gM}{R^*T_0}\int_{H_b}^{H}1dH\\
-&=-\frac{gM}{R^*T_0}(H-H_b)\\
-\frac{P}{P_b}&=\exp (-\frac{gM}{R^*T_0}(H-H_b))\\
 P &= P_b \exp (-\frac{gM}{R^*T_0}(H-H_b))\\
 \end{align*}
+\subsection*{結論}
+ジオポテンシャル高度 $H$ における圧力 $P(H)$ は、次の場合分けで計算される。
 \[
-\therefore
-P(H) :=
+P(H) \coloneq
 \left\{
   \begin{array}{ll}
     P_b \cdot \left( \frac{T_b}{T(H)} \right) ^ {\frac{gM}{R^*L}} & \text{if } L_{M,b} \not = 0\\
@@ -338,69 +355,6 @@ P(H) :=
 \right.
 \]
 
-\subsubsection{$P(H)$}
-
-静水圧平衡の基本式は、圧力 $P$、密度 $\rho$、重力加速度 $g$、幾何高度 $Z$ を用いて次のように表される。
-\[
-\frac{dP}{dZ} = - \rho g
-\]
-ここで、理想気体の状態方程式 $P = \rho \frac{R^*}{M} T_M$ と、ジオポテンシャル高度 $H$ の定義 $dH = \frac{g}{g_0} dZ$ を用いると、基本式は次のように変形できる。
-\[
-\frac{1}{P}\frac{dP}{dH} = -\frac{g_0 M}{R^*T_M(H)}
-\]
-$T_M(H)$ はジオポテンシャル高度 $H$ における分子スケール温度である。
-
-\subsubsection*{場合1: 温度勾配 $L_{M,b} \neq 0$ のとき}
-
-この場合、温度は $T_M(H) = T_{M,b} + L_{M,b}(H - H_b)$ と線形に変化する。基本式を層の底（高度 $H_b$、圧力 $P_b$）から任意の高度 $H$ まで積分する。
-\[
-\int_{P_b}^{P} \frac{1}{P'} dP' = \int_{H_b}^{H} -\frac{g_0 M}{R^* \left[ T_{M,b} + L_{M,b}(H' - H_b) \right]} dH'
-\]
-\[
-\ln\left(\frac{P}{P_b}\right) = - \frac{g_0 M}{R^*} \int_{H_b}^{H} \frac{1}{T_{M,b} + L_{M,b}(H' - H_b)} dH'
-\]
-ここで、右辺の積分を $u = T_{M,b} + L_{M,b}(H' - H_b)$ と置換して計算する。
-このとき $du = L_{M,b} dH'$ であり、積分範囲は $u(H_b) = T_{M,b}$ から $u(H) = T_M(H)$ となる。
-\begin{align*}
-\int_{H_b}^{H} \frac{1}{T_{M,b} + L_{M,b}(H' - H_b)} dH' &= \int_{T_{M,b}}^{T_M(H)} \frac{1}{u} \left(\frac{1}{L_{M,b}} du\right) \\
-&= \frac{1}{L_{M,b}} \left[ \ln\abs{u} \right]_{T_{M,b}}^{T_M(H)} \\
-&= \frac{1}{L_{M,b}} \ln\left( \frac{T_M(H)}{T_{M,b}} \right)
-\end{align*}
-これを元の式に戻すと、
-\begin{align*}
-\ln\left(\frac{P}{P_b}\right) &= - \frac{g_0 M}{R^* L_{M,b}} \ln\left(\frac{T_M(H)}{T_{M,b}}\right) \\
-&= \ln\left[ \left(\frac{T_M(H)}{T_{M,b}}\right)^{-\frac{g_0 M}{R^* L_{M,b}}} \right]
-\end{align*}
-したがって、圧力 $P$ は次式で求められる。
-\[
-P(H) = P_b \left( \frac{T_M(H)}{T_{M,b}} \right)^{-\frac{g_0 M}{R^* L_{M,b}}} = P_b \left( \frac{T_{M,b}}{T_M(H)} \right)^{\frac{g_0 M}{R^* L_{M,b}}}
-\]
-
-\subsubsection*{場合2: 温度勾配 $L_{M,b} = 0$ のとき}
-この場合、温度は層内で一定 ($T_M(H) = T_{M,b}$) となる。基本式はより単純になる。
-\[
-\frac{1}{P}\frac{dP}{dH} = -\frac{g_0 M}{R^* T_{M,b}}
-\]
-これを $H_b$ から $H$ まで積分する。
-\begin{align*}
-\int_{P_b}^{P} \frac{1}{P'} dP' &= \int_{H_b}^{H} -\frac{g_0 M}{R^* T_{M,b}} dH' \\
-\ln\left(\frac{P}{P_b}\right) &= -\frac{g_0 M}{R^* T_{M,b}} \int_{H_b}^{H} 1 \, dH' \\
-&= -\frac{g_0 M}{R^* T_{M,b}} (H - H_b)
-\end{align*}
-したがって、圧力 $P$ は次式で求められる。
-\[
-P(H) = P_b \exp\left(-\frac{g_0 M}{R^* T_{M,b}} (H-H_b)\right)
-\]
-
-\subsubsection*{結論}
-以上をまとめると、ジオポテンシャル高度 $H$ における圧力 $P(H)$ は、次の場合分けで計算される。
-\[
-P(H) =
-\begin{cases}
-  P_b \left( \frac{T_{M,b}}{T_M(H)} \right)^{\frac{g_0 M}{R^*L_{M,b}}} & \text{if } L_{M,b} \neq 0 \\
-  P_b \exp \left( -\frac{g_0 M}{R^*T_{M,b}}(H-H_b) \right) & \text{if } L_{M,b} = 0
-\end{cases}
-\]
 ただし、
 \[
 T_M(H) = T_{M,b} + L_{M,b}(H - H_b)
@@ -437,7 +391,7 @@ T_M(H) = T_{M,b} + L_{M,b}(H - H_b)
 ここで、関数 $\bm{f}(t, \bm{y})$ は、現在の状態 $\bm{y} = \begin{pmatrix} Z \\ v \end{pmatrix}$ が与えられたときの状態の時間的な変化率を定義するものであり、次のように定義される：
 
 \[
-\bm{f}\left(t, \begin{pmatrix} Z \\ v \end{pmatrix}\right) := \begin{pmatrix} v \\ a(t, Z, v) \end{pmatrix}
+\bm{f}\left(t, \begin{pmatrix} Z \\ v \end{pmatrix}\right) \coloneq \begin{pmatrix} v \\ a(t, Z, v) \end{pmatrix}
 \]
 
 このように運動方程式を1階ベクトル常微分方程式の形式で表現することは、ルンゲ＝クッタ法(RK4法)をはじめとする標準的な数値積分アルゴリズムを用いた効率的な解析を可能にするという利点がある。
@@ -488,17 +442,32 @@ T_M(H) = T_{M,b} + L_{M,b}(H - H_b)
 \end{align*}
 本研究では、時間ステップ幅 $\Delta t = 0.01 \, \mathrm{s}$ を用いて、十分な計算精度を確保する。
 
+\section{付録}
+\subsection{P(H)の導出}
+
+\begin{align*}
+T_b&=u(H=H_b)=T_b+LH_b-LH_b\\
+T(H):&=u(H=H)=T_b+LH-LH_b\\\\
+\int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right) &=\frac{1}{L} \ln \left( \frac{T(H)}{T_b} \right)\\\\
+\ln \frac{P}{P_b}
+&=- \frac{gM}{R^*} \int^{T(H)}_{T_b} \frac{1}{u} \left( \frac{1}{L} du \right)\\
+&=- \frac{gM}{R^*L} \ln \left( \frac{T(H)}{T_b} \right)\\
+&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\\\
+\ln \frac{P}{P_b}&=\ln \left( \frac{T(H)}{T_b} \right) ^ {- \frac{gM}{R^*L}}\\
+P &= P_b \cdot \left( \frac{T_b}{T(H)} \right) ^ {\frac{gM}{R^*L}}\\
+\end{align*}
 
 
-\section{補足説明(FAQ)}
-\label{sec:faq}
-
-以下に、本稿の理解を助けるための補足説明を記載する。
-
-\subsection*{Q. 縦ベクトルとは？}
-複数の数値を、特定の順序で縦一列に並べて括弧で囲んだベクトルである。各数値の位置によって、それが表す情報の内容が区別される。例えば、高度 $Z$ と速度 $v$ をまとめた状態ベクトルは $\begin{pmatrix} Z \\ v \end{pmatrix}$ のように表現される。数学的には「列ベクトル」、あるいは「列数が1の行列」とも呼ばれる。
-
-\subsection*{Q. 状態ベクトルとは？}
-物理系や力学系の「状態」を定義するために必要かつ十分な、最小限の独立した変数をまとめてベクトル形式で表現したものである。系の現在の「状態」が既知であれば、その後の系の時間発展(未来の振る舞い)が一意に予測可能となる。本稿における自由落下運動の場合、任意の時刻における物体の高度 $Z$ と速度 $v$ が分かれば、その後の運動は物理法則(運動方程式)によって完全に決定されるため、$(Z, v)$ のペアが系の状態を記述する最小限の情報となる。これらの変数をベクトルとして扱うことで、運動方程式を標準的な形式で記述し、数値解析を行いやすくなる。
+\subsubsection*{2: 温度勾配 $L_{M,b} = 0$}
+この時、温度は層内で一定 ($T_M(H) = T_{M,b}$) となる。基本式はより単純になる。
+\begin{align*}
+\frac{1}{P}\frac{dP}{dH}&=-\frac{gM}{R^*T_0}\\
+\frac{1}{P}dP&=-\frac{gM}{R^*T_0}dH\\
+\int_{P_b}^{P}\frac{1}{P}dP&=\int_{H_b}^{H}\left(-\frac{gM}{R^*T_0}\right)dH\\
+\ln\frac{P}{P_b}&=-\frac{gM}{R^*T_0}\int_{H_b}^{H}1dH\\
+&=-\frac{gM}{R^*T_0}(H-H_b)\\
+\frac{P}{P_b}&=\exp (-\frac{gM}{R^*T_0}(H-H_b))\\
+P &= P_b \exp (-\frac{gM}{R^*T_0}(H-H_b))\\
+\end{align*}
 
 \end{document}

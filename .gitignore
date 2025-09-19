@@ -6,4 +6,5 @@
 *.log
 *.gz
 *.toc
+*.out
 .DS_Store
